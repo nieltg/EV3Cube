@@ -22,11 +22,11 @@ struct cubiecube {
 typedef struct cubiecube cubiecube_t;
 
 // forward declaration
-struct facecube;
+typedef struct facecube facecube_t;
 
 // this CubieCube array represents the 6 basic cube moves
 cubiecube_t* get_moveCube(void);
-cubiecube_t* get_cubiecube(void);
+void init_cubiecube (cubiecube_t* result);
 
 // n choose k
 int Cnk(int n, int k);
@@ -34,7 +34,7 @@ void rotateLeft_corner(corner_t* arr, int l, int r);
 void rotateRight_corner(corner_t* arr, int l, int r);
 void rotateLeft_edge(edge_t* arr, int l, int r);
 void rotateRight_edge(edge_t* arr, int l, int r);
-struct facecube* toFaceCube(cubiecube_t* cubiecube);
+void toFaceCube(cubiecube_t* cubiecube, facecube_t* fcRet);
 void cornerMultiply(cubiecube_t* cubiecube, cubiecube_t* b);
 void edgeMultiply(cubiecube_t* cubiecube, cubiecube_t* b);
 void multiply(cubiecube_t* cubiecube, cubiecube_t* b);

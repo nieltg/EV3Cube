@@ -13,7 +13,7 @@ struct facecube {
 typedef struct facecube facecube_t;
 
 // forward declaration
-struct cubiecube;
+typedef struct cubiecube cubiecube_t;
 
 // Map the corner positions to facelet positions. cornerFacelet[URF.ordinal()][0] e.g. gives the position of the
 // facelet in the URF corner position, which defines the orientation.<br>
@@ -32,10 +32,10 @@ extern color_t cornerColor[8][3];
 // Map the edge positions to facelet colors.
 extern color_t edgeColor[12][2];
 
-facecube_t* get_facecube(void);
-facecube_t* get_facecube_fromstring(char* cubeString);
+void init_facecube (facecube_t* res);
+void init_facecube_fromstring (facecube_t* res, char* cubeString);
 
 void to_String(facecube_t* facecube, char* res);
-struct cubiecube* toCubieCube(facecube_t* facecube);
+void toCubieCube (facecube_t* facecube, cubiecube_t* ccRet);
 
 #endif

@@ -105,10 +105,8 @@ void dump_to_file(void* ptr, int len, const char* name, const char *cache_dir)
     }
 }
 
-coordcube_t* get_coordcube(cubiecube_t* cubiecube)
+void init_coordcube (coordcube_t* result, cubiecube_t* cubiecube)
 {
-    coordcube_t* result = (coordcube_t *) calloc(1, sizeof(coordcube_t));
-
     result->twist       = getTwist(cubiecube);
     result->flip        = getFlip(cubiecube);
     result->parity      = cornerParity(cubiecube);
@@ -117,126 +115,117 @@ coordcube_t* get_coordcube(cubiecube_t* cubiecube)
     result->URtoUL      = getURtoUL(cubiecube);
     result->UBtoDF      = getUBtoDF(cubiecube);
     result->URtoDF      = getURtoDF(cubiecube);// only needed in phase2
-
-    return result;
 }
 
 void initPruning(const char *cache_dir)
 {
-    cubiecube_t* a;
+    cubiecube_t a;
     cubiecube_t* moveCube = get_moveCube();
 
     if(check_cached_table("twistMove", (void*) twistMove, sizeof(twistMove), cache_dir) != 0) {
-        a = get_cubiecube();
+        init_cubiecube (&a);
         for (short i = 0; i < N_TWIST; i++) {
-            setTwist(a, i);
+            setTwist(&a, i);
             for (int j = 0; j < 6; j++) {
                 for (int k = 0; k < 3; k++) {
-                    cornerMultiply(a, &moveCube[j]);
-                    twistMove[i][3 * j + k] = getTwist(a);
+                    cornerMultiply(&a, &moveCube[j]);
+                    twistMove[i][3 * j + k] = getTwist(&a);
                 }
-                cornerMultiply(a, &moveCube[j]);// 4. faceturn restores
+                cornerMultiply(&a, &moveCube[j]);// 4. faceturn restores
             }
         }
-        free(a);
         dump_to_file((void*) twistMove, sizeof(twistMove), "twistMove", cache_dir);
     }
 
     if(check_cached_table("flipMove", (void*) flipMove, sizeof(flipMove), cache_dir) != 0) {
-        a = get_cubiecube();
+        init_cubiecube (&a);
         for (short i = 0; i < N_FLIP; i++) {
-            setFlip(a, i);
+            setFlip(&a, i);
             for (int j = 0; j < 6; j++) {
                 for (int k = 0; k < 3; k++) {
-                    edgeMultiply(a, &moveCube[j]);
-                    flipMove[i][3 * j + k] = getFlip(a);
+                    edgeMultiply(&a, &moveCube[j]);
+                    flipMove[i][3 * j + k] = getFlip(&a);
                 }
-                edgeMultiply(a, &moveCube[j]);
+                edgeMultiply(&a, &moveCube[j]);
             }
         }
-        free(a);
         dump_to_file((void*) flipMove, sizeof(flipMove), "flipMove", cache_dir);
     }
 
     if(check_cached_table("FRtoBR_Move", (void*) FRtoBR_Move, sizeof(FRtoBR_Move), cache_dir) != 0) {
-        a = get_cubiecube();
+        init_cubiecube (&a);
         for (short i = 0; i < N_FRtoBR; i++) {
-            setFRtoBR(a, i);
+            setFRtoBR(&a, i);
             for (int j = 0; j < 6; j++) {
                 for (int k = 0; k < 3; k++) {
-                    edgeMultiply(a, &moveCube[j]);
-                    FRtoBR_Move[i][3 * j + k] = getFRtoBR(a);
+                    edgeMultiply(&a, &moveCube[j]);
+                    FRtoBR_Move[i][3 * j + k] = getFRtoBR(&a);
                 }
-                edgeMultiply(a, &moveCube[j]);
+                edgeMultiply(&a, &moveCube[j]);
             }
         }
-        free(a);
         dump_to_file((void*) FRtoBR_Move, sizeof(FRtoBR_Move), "FRtoBR_Move", cache_dir);
     }
 
     if(check_cached_table("URFtoDLF_Move", (void*) URFtoDLF_Move, sizeof(URFtoDLF_Move), cache_dir) != 0) {
-        a = get_cubiecube();
+        init_cubiecube (&a);
         for (short i = 0; i < N_URFtoDLF; i++) {
-            setURFtoDLF(a, i);
+            setURFtoDLF(&a, i);
             for (int j = 0; j < 6; j++) {
                 for (int k = 0; k < 3; k++) {
-                    cornerMultiply(a, &moveCube[j]);
-                    URFtoDLF_Move[i][3 * j + k] = getURFtoDLF(a);
+                    cornerMultiply(&a, &moveCube[j]);
+                    URFtoDLF_Move[i][3 * j + k] = getURFtoDLF(&a);
                 }
-                cornerMultiply(a, &moveCube[j]);
+                cornerMultiply(&a, &moveCube[j]);
             }
         }
-        free(a);
         dump_to_file((void*) URFtoDLF_Move, sizeof(URFtoDLF_Move), "URFtoDLF_Move", cache_dir);
     }
 
     if(check_cached_table("URtoDF_Move", (void*) URtoDF_Move, sizeof(URtoDF_Move), cache_dir) != 0) {
-        a = get_cubiecube();
+        init_cubiecube (&a);
         for (short i = 0; i < N_URtoDF; i++) {
-            setURtoDF(a, i);
+            setURtoDF(&a, i);
             for (int j = 0; j < 6; j++) {
                 for (int k = 0; k < 3; k++) {
-                    edgeMultiply(a, &moveCube[j]);
-                    URtoDF_Move[i][3 * j + k] = (short) getURtoDF(a);
+                    edgeMultiply(&a, &moveCube[j]);
+                    URtoDF_Move[i][3 * j + k] = (short) getURtoDF(&a);
                     // Table values are only valid for phase 2 moves!
                     // For phase 1 moves, casting to short is not possible.
                 }
-                edgeMultiply(a, &moveCube[j]);
+                edgeMultiply(&a, &moveCube[j]);
             }
         }
-        free(a);
         dump_to_file((void*) URtoDF_Move, sizeof(URtoDF_Move), "URtoDF_Move", cache_dir);
     }
 
     if(check_cached_table("URtoUL_Move", (void*) URtoUL_Move, sizeof(URtoUL_Move), cache_dir) != 0) {
-        a = get_cubiecube();
+        init_cubiecube (&a);
         for (short i = 0; i < N_URtoUL; i++) {
-            setURtoUL(a, i);
+            setURtoUL(&a, i);
             for (int j = 0; j < 6; j++) {
                 for (int k = 0; k < 3; k++) {
-                    edgeMultiply(a, &moveCube[j]);
-                    URtoUL_Move[i][3 * j + k] = getURtoUL(a);
+                    edgeMultiply(&a, &moveCube[j]);
+                    URtoUL_Move[i][3 * j + k] = getURtoUL(&a);
                 }
-                edgeMultiply(a, &moveCube[j]);
+                edgeMultiply(&a, &moveCube[j]);
             }
         }
-        free(a);
         dump_to_file((void*) URtoUL_Move, sizeof(URtoUL_Move), "URtoUL_Move", cache_dir);
     }
 
     if(check_cached_table("UBtoDF_Move", (void*) UBtoDF_Move, sizeof(UBtoDF_Move), cache_dir) != 0) {
-        a = get_cubiecube();
+        init_cubiecube (&a);
         for (short i = 0; i < N_UBtoDF; i++) {
-            setUBtoDF(a, i);
+            setUBtoDF(&a, i);
             for (int j = 0; j < 6; j++) {
                 for (int k = 0; k < 3; k++) {
-                    edgeMultiply(a, &moveCube[j]);
-                    UBtoDF_Move[i][3 * j + k] = getUBtoDF(a);
+                    edgeMultiply(&a, &moveCube[j]);
+                    UBtoDF_Move[i][3 * j + k] = getUBtoDF(&a);
                 }
-                edgeMultiply(a, &moveCube[j]);
+                edgeMultiply(&a, &moveCube[j]);
             }
         }
-        free(a);
         dump_to_file((void*) UBtoDF_Move, sizeof(UBtoDF_Move), "UBtoDF_Move", cache_dir);
     }
 

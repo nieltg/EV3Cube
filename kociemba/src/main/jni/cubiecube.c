@@ -60,10 +60,8 @@ cubiecube_t * get_moveCube()
     return moveCube;
 }
 
-cubiecube_t* get_cubiecube()
+void init_cubiecube (cubiecube_t* result)
 {
-    cubiecube_t* result = (cubiecube_t *) calloc(1, sizeof(cubiecube_t));
-
     static const corner_t   cp[8]   = { URF, UFL, ULB, UBR, DFR, DLF, DBL, DRB };
     static const signed char       co[8]   = { 0, 0, 0, 0, 0, 0, 0, 0 };
     static const edge_t     ep[12]  = { UR, UF, UL, UB, DR, DF, DL, DB, FR, FL, BL, BR };
@@ -73,8 +71,6 @@ cubiecube_t* get_cubiecube()
     memcpy(result->co, co, sizeof(co));
     memcpy(result->ep, ep, sizeof(ep));
     memcpy(result->eo, eo, sizeof(eo));
-    
-    return result;
 }
 
 int Cnk(int n, int k) {
@@ -127,9 +123,8 @@ void rotateRight_edge(edge_t* arr, int l, int r)
     arr[l] = temp;
 }
 
-facecube_t* toFaceCube(cubiecube_t* cubiecube)
+void toFaceCube(cubiecube_t* cubiecube, facecube_t* fcRet)
 {
-    facecube_t* fcRet = get_facecube();
     for(int i = 0; i < CORNER_COUNT; i++) {
         int j = cubiecube->cp[i];// cornercubie with index j is at
         // cornerposition with index i
@@ -145,7 +140,6 @@ facecube_t* toFaceCube(cubiecube_t* cubiecube)
         for (int n = 0; n < 2; n++)
             fcRet->f[edgeFacelet[i][(n + ori) % 2]] = edgeColor[j][n];
     }
-    return fcRet;
 }
 
 void cornerMultiply(cubiecube_t* cubiecube, cubiecube_t* b)
@@ -656,22 +650,21 @@ int verify(cubiecube_t* cubiecube)
 
 int getURtoDF_standalone(short idx1, short idx2)
 {
-    cubiecube_t *a = get_cubiecube();
-    cubiecube_t *b = get_cubiecube();
-    setURtoUL(a, idx1);
-    setUBtoDF(b, idx2);
+    cubiecube_t a, b;
+    init_cubiecube (&a);
+    init_cubiecube (&b);
+    setURtoUL(&a, idx1);
+    setUBtoDF(&b, idx2);
     for (int i = 0; i < 8; i++) {
-        if (a->ep[i] != BR) {
-            if (b->ep[i] != BR) {// collision
+        if (a.ep[i] != BR) {
+            if (b.ep[i] != BR) {// collision
                 return -1;
             } else {
-                b->ep[i] = a->ep[i];
+                b.ep[i] = a.ep[i];
             }
         }
     }
-    int res = getURtoDF(b);
-    free(a);
-    free(b);
+    int res = getURtoDF(&b);
     return res;
 }
 

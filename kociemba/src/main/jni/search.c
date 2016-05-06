@@ -61,7 +61,8 @@ char* solution(char* facelets, int maxDepth, long timeOut, int useSeparator, con
         initPruning(cache_dir);
     }
 
-    search_t* search = (search_t*) calloc(1, sizeof(search_t));
+    search_t search;
+    memset (&search, 0, sizeof (search_t));
 
     int s;
     // +++++++++++++++++++++check for wrong input +++++++++++++++++++++++++++++
@@ -91,32 +92,34 @@ char* solution(char* facelets, int maxDepth, long timeOut, int useSeparator, con
 
     for (int i = 0; i < 6; i++)
         if (count[i] != 9) {
-            free(search);
             return NULL;
         }
 
-    facecube_t* fc = get_facecube_fromstring(facelets);
-    cubiecube_t* cc = toCubieCube(fc);
-    if ((s = verify(cc)) != 0) {
-        free(search);
+    facecube_t fc;
+    init_facecube_fromstring (&fc, facelets);
+    cubiecube_t cc;
+    toCubieCube (&fc, &cc);
+
+    if ((s = verify(&cc)) != 0) {
         return NULL;
     }
 
     // +++++++++++++++++++++++ initialization +++++++++++++++++++++++++++++++++
-    coordcube_t* c = get_coordcube(cc);
+    coordcube_t c;
+    init_coordcube (&c, &cc);
 
-    search->po[0] = 0;
-    search->ax[0] = 0;
-    search->flip[0] = c->flip;
-    search->twist[0] = c->twist;
-    search->parity[0] = c->parity;
-    search->slice[0] = c->FRtoBR / 24;
-    search->URFtoDLF[0] = c->URFtoDLF;
-    search->FRtoBR[0] = c->FRtoBR;
-    search->URtoUL[0] = c->URtoUL;
-    search->UBtoDF[0] = c->UBtoDF;
+    search.po[0] = 0;
+    search.ax[0] = 0;
+    search.flip[0] = c.flip;
+    search.twist[0] = c.twist;
+    search.parity[0] = c.parity;
+    search.slice[0] = c.FRtoBR / 24;
+    search.URFtoDLF[0] = c.URFtoDLF;
+    search.FRtoBR[0] = c.FRtoBR;
+    search.URtoUL[0] = c.URtoUL;
+    search.UBtoDF[0] = c.UBtoDF;
 
-    search->minDistPhase1[1] = 1;// else failure for depth=1, n=0
+    search.minDistPhase1[1] = 1;// else failure for depth=1, n=0
     int mv = 0, n = 0;
     int busy = 0;
     int depthPhase1 = 1;
@@ -126,16 +129,16 @@ char* solution(char* facelets, int maxDepth, long timeOut, int useSeparator, con
     // +++++++++++++++++++ Main loop ++++++++++++++++++++++++++++++++++++++++++
     do {
         do {
-            if ((depthPhase1 - n > search->minDistPhase1[n + 1]) && !busy) {
+            if ((depthPhase1 - n > search.minDistPhase1[n + 1]) && !busy) {
 
-                if (search->ax[n] == 0 || search->ax[n] == 3)// Initialize next move
-                    search->ax[++n] = 1;
+                if (search.ax[n] == 0 || search.ax[n] == 3)// Initialize next move
+                    search.ax[++n] = 1;
                 else
-                    search->ax[++n] = 0;
-                search->po[n] = 1;
-            } else if (++search->po[n] > 3) {
+                    search.ax[++n] = 0;
+                search.po[n] = 1;
+            } else if (++search.po[n] > 3) {
                 do {// increment axis
-                    if (++search->ax[n] > 5) {
+                    if (++search.ax[n] > 5) {
 
                         if (time(NULL) - tStart > timeOut)
                             return NULL;
@@ -145,8 +148,8 @@ char* solution(char* facelets, int maxDepth, long timeOut, int useSeparator, con
                                 return NULL;
                             else {
                                 depthPhase1++;
-                                search->ax[n] = 0;
-                                search->po[n] = 1;
+                                search.ax[n] = 0;
+                                search.po[n] = 1;
                                 busy = 0;
                                 break;
                             }
@@ -157,41 +160,37 @@ char* solution(char* facelets, int maxDepth, long timeOut, int useSeparator, con
                         }
 
                     } else {
-                        search->po[n] = 1;
+                        search.po[n] = 1;
                         busy = 0;
                     }
-                } while (n != 0 && (search->ax[n - 1] == search->ax[n] || search->ax[n - 1] - 3 == search->ax[n]));
+                } while (n != 0 && (search.ax[n - 1] == search.ax[n] || search.ax[n - 1] - 3 == search.ax[n]));
             } else
                 busy = 0;
         } while (busy);
 
         // +++++++++++++ compute new coordinates and new minDistPhase1 ++++++++++
         // if minDistPhase1 =0, the H subgroup is reached
-        mv = 3 * search->ax[n] + search->po[n] - 1;
-        search->flip[n + 1] = flipMove[search->flip[n]][mv];
-        search->twist[n + 1] = twistMove[search->twist[n]][mv];
-        search->slice[n + 1] = FRtoBR_Move[search->slice[n] * 24][mv] / 24;
-        search->minDistPhase1[n + 1] = MAX(
-            getPruning(Slice_Flip_Prun, N_SLICE1 * search->flip[n + 1] + search->slice[n + 1]),
-            getPruning(Slice_Twist_Prun, N_SLICE1 * search->twist[n + 1] + search->slice[n + 1])
+        mv = 3 * search.ax[n] + search.po[n] - 1;
+        search.flip[n + 1] = flipMove[search.flip[n]][mv];
+        search.twist[n + 1] = twistMove[search.twist[n]][mv];
+        search.slice[n + 1] = FRtoBR_Move[search.slice[n] * 24][mv] / 24;
+        search.minDistPhase1[n + 1] = MAX(
+            getPruning(Slice_Flip_Prun, N_SLICE1 * search.flip[n + 1] + search.slice[n + 1]),
+            getPruning(Slice_Twist_Prun, N_SLICE1 * search.twist[n + 1] + search.slice[n + 1])
         );
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // System.out.format("%d %d\n", n, depthPhase1);
-        if (search->minDistPhase1[n + 1] == 0 && n >= depthPhase1 - 5) {
-            search->minDistPhase1[n + 1] = 10;// instead of 10 any value >5 is possible
-            if (n == depthPhase1 - 1 && (s = totalDepth(search, depthPhase1, maxDepth)) >= 0) {
+        if (search.minDistPhase1[n + 1] == 0 && n >= depthPhase1 - 5) {
+            search.minDistPhase1[n + 1] = 10;// instead of 10 any value >5 is possible
+            if (n == depthPhase1 - 1 && (s = totalDepth(&search, depthPhase1, maxDepth)) >= 0) {
                 if (s == depthPhase1
-                        || (search->ax[depthPhase1 - 1] != search->ax[depthPhase1] && search->ax[depthPhase1 - 1] != search->ax[depthPhase1] + 3)) {
-                    free((void*) fc);
-                    free((void*) cc);
-                    free((void*) c);
+                        || (search.ax[depthPhase1 - 1] != search.ax[depthPhase1] && search.ax[depthPhase1 - 1] != search.ax[depthPhase1] + 3)) {
                     char* res;
                     if (useSeparator) {
-                        res = solutionToString(search, s, depthPhase1);
+                        res = solutionToString(&search, s, depthPhase1);
                     } else {
-                        res = solutionToString(search, s, -1);
+                        res = solutionToString(&search, s, -1);
                     }
-                    free((void*) search);
                     return res;
                 }
             }
@@ -303,19 +302,16 @@ int totalDepth(search_t* search, int depthPhase1, int maxDepth)
 
 void patternize(char* facelets, char* pattern, char* patternized)
 {
-    facecube_t* start_fc = get_facecube_fromstring(facelets);
-    facecube_t* pattern_fc = get_facecube_fromstring(pattern);
-    cubiecube_t* start_cc = toCubieCube(start_fc);
-    cubiecube_t* pattern_cc = toCubieCube(pattern_fc);
-    cubiecube_t* inv_pattern_cc = get_cubiecube();
-    invCubieCube(pattern_cc, inv_pattern_cc);
-    multiply(inv_pattern_cc, start_cc);
-    facecube_t* fc = toFaceCube(inv_pattern_cc);
-    to_String(fc, patternized);
-    free(start_fc);
-    free(pattern_fc);
-    free(start_cc);
-    free(pattern_cc);
-    free(inv_pattern_cc);
-    free(fc);
+    facecube_t start_fc, pattern_fc, fc;
+    cubiecube_t start_cc, pattern_cc, inv_pattern_cc;
+
+    init_facecube_fromstring(&start_fc, facelets);
+    init_facecube_fromstring(&pattern_fc, pattern);
+    toCubieCube(&start_fc, &start_cc);
+    toCubieCube(&pattern_fc, &pattern_cc);
+    init_cubiecube (&inv_pattern_cc);
+    invCubieCube(&pattern_cc, &inv_pattern_cc);
+    multiply(&inv_pattern_cc, &start_cc);
+    toFaceCube (&inv_pattern_cc, &fc);
+    to_String(&fc, patternized);
 }
