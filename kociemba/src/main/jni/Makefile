@@ -1,4 +1,4 @@
-CKOCIEMBA_SRC = coordcube.c cubiecube.c facecube.c search.c
+CKOCIEMBA_SRC = coordcube.c cubiecube.c facecube.c search.c cache.c
 CFLAGS = -std=c99 -O3
 BINDIR = bin
 BIN = kociemba

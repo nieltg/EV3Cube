@@ -4,6 +4,7 @@
 #include "color.h"
 #include "facecube.h"
 #include "coordcube.h"
+#include "cache.h"
 
 #define MIN(a, b) (((a)<(b))?(a):(b))
 #define MAX(a, b) (((a)>(b))?(a):(b))
@@ -57,9 +58,7 @@ char* solutionToString(search_t* search, int length, int depthPhase1)
 
 char* solution(char* facelets, int maxDepth, long timeOut, int useSeparator, const char* cache_dir)
 {
-    if (PRUNING_INITED == 0) {
-        initPruning(cache_dir);
-    }
+    cache_prepare (cache_dir);
 
     search_t search;
     memset (&search, 0, sizeof (search_t));
@@ -171,12 +170,12 @@ char* solution(char* facelets, int maxDepth, long timeOut, int useSeparator, con
         // +++++++++++++ compute new coordinates and new minDistPhase1 ++++++++++
         // if minDistPhase1 =0, the H subgroup is reached
         mv = 3 * search.ax[n] + search.po[n] - 1;
-        search.flip[n + 1] = flipMove[search.flip[n]][mv];
-        search.twist[n + 1] = twistMove[search.twist[n]][mv];
-        search.slice[n + 1] = FRtoBR_Move[search.slice[n] * 24][mv] / 24;
+        search.flip[n + 1] = cache->flipMove[search.flip[n]][mv];
+        search.twist[n + 1] = cache->twistMove[search.twist[n]][mv];
+        search.slice[n + 1] = cache->FRtoBR_Move[search.slice[n] * 24][mv] / 24;
         search.minDistPhase1[n + 1] = MAX(
-            getPruning(Slice_Flip_Prun, N_SLICE1 * search.flip[n + 1] + search.slice[n + 1]),
-            getPruning(Slice_Twist_Prun, N_SLICE1 * search.twist[n + 1] + search.slice[n + 1])
+            getPruning(cache->Slice_Flip_Prun, N_SLICE1 * search.flip[n + 1] + search.slice[n + 1]),
+            getPruning(cache->Slice_Twist_Prun, N_SLICE1 * search.twist[n + 1] + search.slice[n + 1])
         );
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // System.out.format("%d %d\n", n, depthPhase1);
@@ -207,23 +206,23 @@ int totalDepth(search_t* search, int depthPhase1, int maxDepth)
     for (int i = 0; i < depthPhase1; i++) {
         mv = 3 * search->ax[i] + search->po[i] - 1;
         // System.out.format("%d %d %d %d\n", i, mv, ax[i], po[i]);
-        search->URFtoDLF[i + 1] = URFtoDLF_Move[search->URFtoDLF[i]][mv];
-        search->FRtoBR[i + 1] = FRtoBR_Move[search->FRtoBR[i]][mv];
+        search->URFtoDLF[i + 1] = cache->URFtoDLF_Move[search->URFtoDLF[i]][mv];
+        search->FRtoBR[i + 1] = cache->FRtoBR_Move[search->FRtoBR[i]][mv];
         search->parity[i + 1] = parityMove[search->parity[i]][mv];
     }
 
-    if ((d1 = getPruning(Slice_URFtoDLF_Parity_Prun,
+    if ((d1 = getPruning(cache->Slice_URFtoDLF_Parity_Prun,
             (N_SLICE2 * search->URFtoDLF[depthPhase1] + search->FRtoBR[depthPhase1]) * 2 + search->parity[depthPhase1])) > maxDepthPhase2)
         return -1;
 
     for (int i = 0; i < depthPhase1; i++) {
         mv = 3 * search->ax[i] + search->po[i] - 1;
-        search->URtoUL[i + 1] = URtoUL_Move[search->URtoUL[i]][mv];
-        search->UBtoDF[i + 1] = UBtoDF_Move[search->UBtoDF[i]][mv];
+        search->URtoUL[i + 1] = cache->URtoUL_Move[search->URtoUL[i]][mv];
+        search->UBtoDF[i + 1] = cache->UBtoDF_Move[search->UBtoDF[i]][mv];
     }
-    search->URtoDF[depthPhase1] = MergeURtoULandUBtoDF[search->URtoUL[depthPhase1]][search->UBtoDF[depthPhase1]];
+    search->URtoDF[depthPhase1] = cache->MergeURtoULandUBtoDF[search->URtoUL[depthPhase1]][search->UBtoDF[depthPhase1]];
 
-    if ((d2 = getPruning(Slice_URtoDF_Parity_Prun,
+    if ((d2 = getPruning(cache->Slice_URtoDF_Parity_Prun,
             (N_SLICE2 * search->URtoDF[depthPhase1] + search->FRtoBR[depthPhase1]) * 2 + search->parity[depthPhase1])) > maxDepthPhase2)
         return -1;
 
@@ -284,14 +283,14 @@ int totalDepth(search_t* search, int depthPhase1, int maxDepth)
         // +++++++++++++ compute new coordinates and new minDist ++++++++++
         mv = 3 * search->ax[n] + search->po[n] - 1;
 
-        search->URFtoDLF[n + 1] = URFtoDLF_Move[search->URFtoDLF[n]][mv];
-        search->FRtoBR[n + 1] = FRtoBR_Move[search->FRtoBR[n]][mv];
+        search->URFtoDLF[n + 1] = cache->URFtoDLF_Move[search->URFtoDLF[n]][mv];
+        search->FRtoBR[n + 1] = cache->FRtoBR_Move[search->FRtoBR[n]][mv];
         search->parity[n + 1] = parityMove[search->parity[n]][mv];
-        search->URtoDF[n + 1] = URtoDF_Move[search->URtoDF[n]][mv];
+        search->URtoDF[n + 1] = cache->URtoDF_Move[search->URtoDF[n]][mv];
 
-        search->minDistPhase2[n + 1] = MAX(getPruning(Slice_URtoDF_Parity_Prun, (N_SLICE2
+        search->minDistPhase2[n + 1] = MAX(getPruning(cache->Slice_URtoDF_Parity_Prun, (N_SLICE2
                 * search->URtoDF[n + 1] + search->FRtoBR[n + 1])
-                * 2 + search->parity[n + 1]), getPruning(Slice_URFtoDLF_Parity_Prun, (N_SLICE2
+                * 2 + search->parity[n + 1]), getPruning(cache->Slice_URFtoDLF_Parity_Prun, (N_SLICE2
                 * search->URFtoDLF[n + 1] + search->FRtoBR[n + 1])
                 * 2 + search->parity[n + 1]));
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

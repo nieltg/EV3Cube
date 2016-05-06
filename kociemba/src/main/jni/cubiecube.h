@@ -25,7 +25,7 @@ typedef struct cubiecube cubiecube_t;
 typedef struct facecube facecube_t;
 
 // this CubieCube array represents the 6 basic cube moves
-cubiecube_t* get_moveCube(void);
+void init_moveCube ();
 void init_cubiecube (cubiecube_t* result);
 
 // n choose k
