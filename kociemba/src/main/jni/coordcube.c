@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <linux/limits.h>
 #include <string.h>
 #include <unistd.h>
 #include "coordcube.h"
@@ -28,23 +29,16 @@ void move(coordcube_t* coordcube, int m)
         coordcube->URtoDF = cache->MergeURtoULandUBtoDF[coordcube->URtoUL][coordcube->UBtoDF];
 }
 
-char * join_path(const char *dir, const char *filename)
+int join_path(char *buf, int len, const char *dir, const char *filename)
 {
-    size_t path_len = strnlen(dir, 200);
-    if (path_len == 200) {
-        return NULL;
-    }
-    char *fpath = calloc(path_len + 32, 1);
-    strcpy(fpath, dir);
-    strcat(fpath, "/");
-    strncat(fpath, filename, 30);
-    return fpath;
+    int out = snprintf (buf, len, "%s/%s", dir, filename);
+    return (out >= 0) && (out < len);
 }
 
 int check_cached_table(const char* name, void* ptr, int len, const char *cache_dir)
 {
-    char *fname = join_path(cache_dir, name);
-    if (fname == NULL) {
+	char fname[PATH_MAX];
+    if (!join_path(fname, PATH_MAX, cache_dir, name)) {
         fprintf(stderr, "Path to cache tables is too long\n");
         return -1;
     }
@@ -58,7 +52,7 @@ int check_cached_table(const char* name, void* ptr, int len, const char *cache_d
         fprintf(stderr, "Cache table %s was not found. Recalculating.\n", fname);
         res = 1;
     }
-    free(fname);
+
     return res;
 }
 
@@ -75,13 +69,12 @@ void dump_to_file(void* ptr, int len, const char* name, const char *cache_dir)
     int status;
     status = mkdir(cache_dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if (status == 0 || errno == EEXIST) {
-        char *fname = join_path(cache_dir, name);
-        if (fname == NULL) {
+        char fname[PATH_MAX];
+        if (!join_path (fname, PATH_MAX, cache_dir, name)) {
             fprintf(stderr, "Path to cache tables is too long\n");
         } else {
             FILE* f = fopen(fname, "w");
             fwrite(ptr, len, 1, f);
-            free(fname);
             fclose(f);
         }
     } else {
