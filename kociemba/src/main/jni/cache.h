@@ -90,6 +90,7 @@ CacheTable;
 
 extern CacheTable* cache;
 
+int cache_is_prepared (void);
 void cache_prepare (const char *cache_dir);
 void cache_destroy (void);
 

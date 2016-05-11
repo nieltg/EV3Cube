@@ -5,6 +5,11 @@
 
 CacheTable* cache = NULL;
 
+int cache_is_prepared (void)
+{
+	return cache != NULL;
+}
+
 void cache_prepare (const char *cache_dir)
 {
 	if (cache != NULL) return;

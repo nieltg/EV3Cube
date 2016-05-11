@@ -23,7 +23,7 @@ void init_facecube (facecube_t* res)
     memcpy(res->f, f, sizeof(f));
 }
 
-void init_facecube_fromstring (facecube_t* res, char* cubeString)
+void init_facecube_fromstring (facecube_t* res, const char* cubeString)
 {
     for (int i = 0; i < 54; i++) {
         switch(cubeString[i]) {

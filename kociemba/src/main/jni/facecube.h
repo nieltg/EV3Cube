@@ -33,7 +33,7 @@ extern color_t cornerColor[8][3];
 extern color_t edgeColor[12][2];
 
 void init_facecube (facecube_t* res);
-void init_facecube_fromstring (facecube_t* res, char* cubeString);
+void init_facecube_fromstring (facecube_t* res, const char* cubeString);
 
 void to_String(facecube_t* facecube, char* res);
 void toCubieCube (facecube_t* facecube, cubiecube_t* ccRet);

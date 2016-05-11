@@ -56,9 +56,15 @@ char* solutionToString(search_t* search, int length, int depthPhase1)
 }
 
 
-char* solution(char* facelets, int maxDepth, long timeOut, int useSeparator, const char* cache_dir)
+char* solution(const char* facelets, int maxDepth, long timeOut, int useSeparator, int* errcode)
 {
-    cache_prepare (cache_dir);
+	*errcode = 0;
+
+	if (!cache_is_prepared ())
+	{
+		*errcode = -9;
+		return NULL;
+	}
 
     search_t search;
     memset (&search, 0, sizeof (search_t));
@@ -90,7 +96,9 @@ char* solution(char* facelets, int maxDepth, long timeOut, int useSeparator, con
         }
 
     for (int i = 0; i < 6; i++)
-        if (count[i] != 9) {
+        if (count[i] != 9)
+        {
+            *errcode = -1;
             return NULL;
         }
 
@@ -99,7 +107,9 @@ char* solution(char* facelets, int maxDepth, long timeOut, int useSeparator, con
     cubiecube_t cc;
     toCubieCube (&fc, &cc);
 
-    if ((s = verify(&cc)) != 0) {
+    if ((s = verify(&cc)) != 0)
+    {
+        *errcode = s;
         return NULL;
     }
 
@@ -140,12 +150,19 @@ char* solution(char* facelets, int maxDepth, long timeOut, int useSeparator, con
                     if (++search.ax[n] > 5) {
 
                         if (time(NULL) - tStart > timeOut)
+                        {
+                            *errcode = -8;
                             return NULL;
+                        }
 
                         if (n == 0) {
                             if (depthPhase1 >= maxDepth)
+                            {
+                                *errcode = -7;
                                 return NULL;
-                            else {
+                            }
+                            else
+                            {
                                 depthPhase1++;
                                 search.ax[n] = 0;
                                 search.po[n] = 1;
