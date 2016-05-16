@@ -1,6 +1,6 @@
-/* nieltg_kociemba_CubeSolver.c by @nieltg */
+/* nieltg_kociemba_CubeSolverImpl.c by @nieltg */
 
-#include "nieltg_kociemba_CubeSolver.h"
+#include "nieltg_kociemba_CubeSolverImpl.h"
 extern "C" {
 #include "cache.h"
 #include "search.h"
@@ -19,14 +19,14 @@ glue_solve_exception (JNIEnv * env, int errcode)
 }
 
 JNIEXPORT jboolean JNICALL
-Java_nieltg_kociemba_CubeSolver_isReady (JNIEnv * env, jclass thiz)
+Java_nieltg_kociemba_CubeSolverImpl_isReady (JNIEnv * env, jclass thiz)
 {
 	return cache_is_prepared ();
 }
 
 JNIEXPORT void JNICALL
-Java_nieltg_kociemba_CubeSolver_prepare (JNIEnv * env, jclass thiz,
-                                         jstring j_path)
+Java_nieltg_kociemba_CubeSolverImpl_prepare (JNIEnv * env, jclass thiz,
+                                             jstring j_path)
 {
 	const char* path = env->GetStringUTFChars (j_path, nullptr);
 	cache_prepare (path);
@@ -35,8 +35,8 @@ Java_nieltg_kociemba_CubeSolver_prepare (JNIEnv * env, jclass thiz,
 }
 
 JNIEXPORT jstring JNICALL
-Java_nieltg_kociemba_CubeSolver_solve (JNIEnv * env, jclass thiz,
-                                       jstring j_face)
+Java_nieltg_kociemba_CubeSolverImpl_solve (JNIEnv * env, jclass thiz,
+                                           jstring j_face)
 {
 	const char* face = env->GetStringUTFChars (j_face, nullptr);
 	
@@ -62,7 +62,7 @@ Java_nieltg_kociemba_CubeSolver_solve (JNIEnv * env, jclass thiz,
 }
 
 JNIEXPORT void JNICALL
-Java_nieltg_kociemba_CubeSolver_destroy (JNIEnv * env, jclass thiz)
+Java_nieltg_kociemba_CubeSolverImpl_destroy (JNIEnv * env, jclass thiz)
 {
 	cache_destroy ();
 }

@@ -15,7 +15,7 @@ LOCAL_SRC_FILES := \
 	facecube.c  \
 	search.c    \
 	cache.c     \
-	nieltg_kociemba_CubeSolver.cpp
+	nieltg_kociemba_CubeSolverImpl.cpp
 
 include $(BUILD_SHARED_LIBRARY)
 
