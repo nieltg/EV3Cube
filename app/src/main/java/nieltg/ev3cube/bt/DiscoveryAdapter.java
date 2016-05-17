@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import nieltg.ev3cube.R;
-import nieltg.robomsg.RoboMessaging;
+import nieltg.robomsg.Messenger;
 
 public class DiscoveryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
@@ -51,7 +50,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
 		for (BluetoothDevice device : devices)
 		{
-			if (RoboMessaging.isRoboDevice (device))
+			if (Messenger.isCompatibleDevice (device))
 				mBonded.add (device);
 		}
 
@@ -60,7 +59,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
 	public void notifyDevice (BluetoothDevice device)
 	{
-		if (RoboMessaging.isRoboDevice (device))
+		if (Messenger.isCompatibleDevice (device))
 		{
 			if (!mDiscov.contains (device))
 				mDiscov.add (device);
