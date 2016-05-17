@@ -12,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -36,32 +35,31 @@ public class DiscoverActivity extends AppCompatActivity
 		{
 			String action = intent.getAction ();
 
-			if (action.equals (BluetoothDevice.ACTION_FOUND))
+			switch (action)
 			{
+			case BluetoothDevice.ACTION_FOUND:
 				BluetoothDevice device = intent.getParcelableExtra (BluetoothDevice.EXTRA_DEVICE);
 				mListAdapter.notifyDevice (device);
-			}
-			else
-			if (action.equals (BluetoothAdapter.ACTION_STATE_CHANGED))
-			{
+				break;
+
+			case BluetoothAdapter.ACTION_STATE_CHANGED:
 				int state = intent.getIntExtra (BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
 				if (state == BluetoothAdapter.STATE_OFF)
 					finish ();
-			}
-			else
-			if (action.equals (BluetoothAdapter.ACTION_DISCOVERY_STARTED))
-			{
+				break;
+
+			case BluetoothAdapter.ACTION_DISCOVERY_STARTED:
 				mListAdapter.reset ();
 
 				mProgress.setVisibility (View.VISIBLE);
 				mScanButton.setText (R.string.stop);
-			}
-			else
-			if (action.equals (BluetoothAdapter.ACTION_DISCOVERY_FINISHED))
-			{
+				break;
+
+			case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
 				mProgress.setVisibility (View.INVISIBLE);
 				mScanButton.setText (R.string.scan);
+				break;
 			}
 		}
 	};
@@ -135,13 +133,8 @@ public class DiscoverActivity extends AppCompatActivity
 	{
 		super.onResume ();
 
-		if (mBTAdapter.isEnabled ())
-			mBTAdapter.startDiscovery ();
-		else
-		{
-			Intent intent = new Intent (BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			startActivityForResult (intent, REQUEST_ENABLE_BT);
-		}
+		// Fixed: Register all receivers first, then startDiscovery ()
+		// Prevent race-condition between evts and registerReceiver ()
 
 		IntentFilter filter;
 
@@ -153,6 +146,14 @@ public class DiscoverActivity extends AppCompatActivity
 		registerReceiver (mReceiver, filter);
 		filter = new IntentFilter (BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 		registerReceiver (mReceiver, filter);
+
+		if (mBTAdapter.isEnabled ())
+			mBTAdapter.startDiscovery ();
+		else
+		{
+			Intent intent = new Intent (BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			startActivityForResult (intent, REQUEST_ENABLE_BT);
+		}
 	}
 
 	@Override
