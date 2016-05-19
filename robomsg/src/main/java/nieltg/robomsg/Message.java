@@ -24,7 +24,8 @@ public class Message
 
 	public Message (byte[] blob)
 	{
-		ByteBuffer buf = ByteBuffer.wrap (blob);
+		// Fixed: Use ByteOrder.LITTLE_ENDIAN to process EV3 message blobs
+		ByteBuffer buf = ByteBuffer.wrap (blob).order (ByteOrder.LITTLE_ENDIAN);
 
 		// Part 1: Message header
 
@@ -87,7 +88,11 @@ public class Message
 	public String getTitle ()
 	{
 		int len = mBufTitle.length - 1;
-		return new String (mBufTitle, 1, len, ASCII_CHARSET);
+
+		// Fixed: Don't skip bytes in mBufTitle because
+		// we don't put size parameter inside mBufTitle
+
+		return new String (mBufTitle, 0, len, ASCII_CHARSET);
 	}
 
 	public void setContent (float data)

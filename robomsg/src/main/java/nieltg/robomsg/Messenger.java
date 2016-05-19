@@ -51,6 +51,9 @@ public class Messenger
 			}
 
 			disconnect ();
+
+			if (mListener != null)
+				mListener.onDisconnect ();
 		}
 	};
 
@@ -138,10 +141,13 @@ public class Messenger
 			{
 				try
 				{
-					mIs.close ();
-					mOs.close ();
+					if (mIs != null)
+						mIs.close ();
+					if (mOs != null)
+						mOs.close ();
 
-					mSocket.close ();
+					if (mSocket != null)
+						mSocket.close ();
 				}
 				catch (IOException e)
 				{

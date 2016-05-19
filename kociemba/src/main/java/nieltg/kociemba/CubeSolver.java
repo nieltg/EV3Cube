@@ -1,5 +1,7 @@
 package nieltg.kociemba;
 
+import android.util.Log;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -31,7 +33,10 @@ public class CubeSolver
 			@Override
 			public void run ()
 			{
+
+				Log.i ("Kociemba", "prepare, cacheDir=" + cacheDir);
 				CubeSolverImpl.prepare (cacheDir);
+				Log.i ("Kociemba", "prepare done");
 
 				if (mListener != null)
 					mListener.onPrepare ();
@@ -48,12 +53,16 @@ public class CubeSolver
 			{
 				try
 				{
+					Log.i ("Kociemba", "solve, problem=" + facelets);
 					String sol = CubeSolverImpl.solve (facelets);
+					Log.i ("Kociemba", "solve done, solution=" + sol);
 
 					if (mListener != null)
 						mListener.onSolve (sol);
 				} catch (SolveException e)
 				{
+					Log.w ("Kociemba", "solve error: " + e.getMessage ());
+
 					if (mListener != null)
 						mListener.onSolveError (e);
 				}
@@ -68,7 +77,10 @@ public class CubeSolver
 			@Override
 			public void run ()
 			{
+
+				Log.i ("Kociemba", "destroy");
 				CubeSolverImpl.destroy ();
+				Log.i ("Kociemba", "destroy done");
 
 				if (mListener != null)
 					mListener.onDestroy ();
