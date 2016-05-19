@@ -77,8 +77,11 @@ public class CubeOutput
 
 		for (int i = 0; i < loop; i++)
 		{
-			if (accent) mTracking.rotateCCW ();
-			else mTracking.rotateCW ();
+			// Fixed: Accent in solution means rotate clockwise
+			// instead of rotate counter-clockwise (mirroring)
+
+			if (accent) mTracking.rotateCW ();
+			else mTracking.rotateCCW ();
 		}
 
 		mTracking.unlock ();

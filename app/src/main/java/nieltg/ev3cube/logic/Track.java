@@ -114,11 +114,16 @@ public class Track implements Parcelable
 
 	public void rotateCCW ()
 	{
-		int tempo = mTrack[0];
-		mTrack[0] = mTrack[3];
-		mTrack[3] = mTrack[5];
-		mTrack[5] = mTrack[1];
-		mTrack[1] = tempo;
+		// Fixed: Don't change cube state if cube is locked! (1)
+
+		if (!mLock)
+		{
+			int tempo = mTrack[0];
+			mTrack[0] = mTrack[3];
+			mTrack[3] = mTrack[5];
+			mTrack[5] = mTrack[1];
+			mTrack[1] = tempo;
+		}
 
 		if (mRecord != null)
 			mRecord.add (Mechanic.R_CCW);
@@ -126,11 +131,16 @@ public class Track implements Parcelable
 
 	public void rotateCW ()
 	{
-		int tempo = mTrack[0];
-		mTrack[0] = mTrack[1];
-		mTrack[1] = mTrack[5];
-		mTrack[5] = mTrack[3];
-		mTrack[3] = tempo;
+		// Fixed: Don't change cube state if cube is locked! (2)
+
+		if (!mLock)
+		{
+			int tempo = mTrack[0];
+			mTrack[0] = mTrack[1];
+			mTrack[1] = mTrack[5];
+			mTrack[5] = mTrack[3];
+			mTrack[3] = tempo;
+		}
 
 		if (mRecord != null)
 			mRecord.add (Mechanic.R_CW);
