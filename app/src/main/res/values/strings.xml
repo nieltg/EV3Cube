@@ -8,4 +8,5 @@
     <string name="section_bt_available">Available Devices</string>
     <string name="scan">Scan</string>
     <string name="stop">Stop</string>
+    <string name="solving">Solving...</string>
 </resources>
