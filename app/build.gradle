@@ -27,4 +27,5 @@ dependencies {
     compile project(':kociemba')
     compile project(':opencv')
     compile project(':robomsg')
+    compile project(':cvcube')
 }

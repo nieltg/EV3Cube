@@ -1,2 +1,2 @@
-include ':app', ':kociemba', ':robomsg'
+include ':app', ':kociemba', ':robomsg', ':cvcube'
 include ':opencv'
